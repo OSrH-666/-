@@ -4,9 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.unionsystem.entity.Activity;
 import com.example.unionsystem.entity.Registration;
+import com.example.unionsystem.mapper.ActivityMapper;
 import com.example.unionsystem.mapper.RegistrationMapper;
-import com.example.unionsystem.service.ActivityService;
 import com.example.unionsystem.service.RegistrationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,25 +17,21 @@ import java.util.List;
 @Service
 public class RegistrationServiceImpl extends ServiceImpl<RegistrationMapper, Registration> implements RegistrationService {
 
-    private final ActivityService activityService;
-
-    public RegistrationServiceImpl(ActivityService activityService) {
-        this.activityService = activityService;
-    }
+    @Autowired
+    private ActivityMapper activityMapper;
 
     @Override
     @Transactional
     public Registration register(Long activityId, Long userId) {
-        Activity activity = activityService.getById(activityId);
+        Activity activity = activityMapper.selectById(activityId);
         if (activity == null || activity.getStatus() != 1) {
             throw new RuntimeException("活动不存在或未发布");
         }
 
         LambdaQueryWrapper<Registration> existsQuery = new LambdaQueryWrapper<>();
-        existsQuery.eq(Registration::getActivityId, activityId)
-                   .eq(Registration::getUserId, userId);
+        existsQuery.eq(Registration::getActivityId, activityId).eq(Registration::getUserId, userId);
         if (exists(existsQuery)) {
-            throw new RuntimeException("已报名该活动");
+            throw new RuntimeException("已经报名过该活动");
         }
 
         int confirmedCount = getConfirmedCount(activityId);
@@ -47,11 +44,11 @@ public class RegistrationServiceImpl extends ServiceImpl<RegistrationMapper, Reg
             registration.setStatus(1);
             registration.setConfirmedAt(LocalDateTime.now());
         } else {
-            int queuePosition = (int) count(new LambdaQueryWrapper<Registration>()
-                    .eq(Registration::getActivityId, activityId)
-                    .eq(Registration::getStatus, 2)) + 1;
+            LambdaQueryWrapper<Registration> queueQuery = new LambdaQueryWrapper<>();
+            queueQuery.eq(Registration::getActivityId, activityId).eq(Registration::getStatus, 2);
+            long queueCount = count(queueQuery);
             registration.setStatus(2);
-            registration.setQueuePosition(queuePosition);
+            registration.setQueuePosition((int) queueCount + 1);
         }
 
         save(registration);
@@ -62,81 +59,40 @@ public class RegistrationServiceImpl extends ServiceImpl<RegistrationMapper, Reg
     @Transactional
     public void cancelRegistration(Long activityId, Long userId) {
         LambdaQueryWrapper<Registration> query = new LambdaQueryWrapper<>();
-        query.eq(Registration::getActivityId, activityId)
-             .eq(Registration::getUserId, userId);
+        query.eq(Registration::getActivityId, activityId).eq(Registration::getUserId, userId);
         Registration registration = getOne(query);
 
         if (registration != null) {
-            if (registration.getStatus() == 1) {
-                registration.setStatus(3);
-                updateById(registration);
-                processWaitingQueue(activityId);
-            } else if (registration.getStatus() == 2) {
-                registration.setStatus(3);
-                updateById(registration);
-                updateQueuePositions(activityId, registration.getQueuePosition());
-            }
+            registration.setStatus(3);
+            updateById(registration);
         }
     }
 
     @Override
     public List<Registration> listByActivity(Long activityId) {
-        return list(new LambdaQueryWrapper<Registration>()
-                .eq(Registration::getActivityId, activityId)
-                .orderByDesc(Registration::getRegisteredAt));
+        LambdaQueryWrapper<Registration> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Registration::getActivityId, activityId);
+        wrapper.orderByDesc(Registration::getRegisteredAt);
+        return list(wrapper);
     }
 
     @Override
     public List<Registration> listByUser(Long userId) {
-        return list(new LambdaQueryWrapper<Registration>()
-                .eq(Registration::getUserId, userId)
-                .orderByDesc(Registration::getRegisteredAt));
+        LambdaQueryWrapper<Registration> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Registration::getUserId, userId);
+        wrapper.orderByDesc(Registration::getRegisteredAt);
+        return list(wrapper);
     }
 
     @Override
     public int getConfirmedCount(Long activityId) {
-        return (int) count(new LambdaQueryWrapper<Registration>()
-                .eq(Registration::getActivityId, activityId)
-                .eq(Registration::getStatus, 1));
+        LambdaQueryWrapper<Registration> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Registration::getActivityId, activityId);
+        wrapper.eq(Registration::getStatus, 1);
+        return (int) count(wrapper);
     }
 
     @Override
-    @Transactional
     public void processWaitingQueue(Long activityId) {
-        Activity activity = activityService.getById(activityId);
-        if (activity == null || activity.getQuota() == 0) {
-            return;
-        }
-
-        int currentCount = getConfirmedCount(activityId);
-        int availableSlots = activity.getQuota() - currentCount;
-
-        if (availableSlots > 0) {
-            List<Registration> waitingList = list(new LambdaQueryWrapper<Registration>()
-                    .eq(Registration::getActivityId, activityId)
-                    .eq(Registration::getStatus, 2)
-                    .orderByAsc(Registration::getQueuePosition)
-                    .last("LIMIT " + availableSlots));
-
-            for (Registration registration : waitingList) {
-                registration.setStatus(1);
-                registration.setConfirmedAt(LocalDateTime.now());
-                registration.setQueuePosition(0);
-                updateById(registration);
-            }
-        }
-    }
-
-    private void updateQueuePositions(Long activityId, int startPosition) {
-        List<Registration> waitingList = list(new LambdaQueryWrapper<Registration>()
-                .eq(Registration::getActivityId, activityId)
-                .eq(Registration::getStatus, 2)
-                .gt(Registration::getQueuePosition, startPosition)
-                .orderByAsc(Registration::getQueuePosition));
-
-        for (Registration registration : waitingList) {
-            registration.setQueuePosition(registration.getQueuePosition() - 1);
-            updateById(registration);
-        }
     }
 }
