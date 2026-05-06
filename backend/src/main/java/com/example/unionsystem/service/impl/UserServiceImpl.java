@@ -8,8 +8,8 @@ import com.example.unionsystem.dto.response.LoginResponse;
 import com.example.unionsystem.entity.User;
 import com.example.unionsystem.mapper.UserMapper;
 import com.example.unionsystem.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,11 +27,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Value("${jwt.expiration}")
     private Long jwtExpiration;
 
-    private final PasswordEncoder passwordEncoder;
-
-    public UserServiceImpl(@Lazy PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -40,7 +37,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new RuntimeException("用户名或密码错误");
         }
         if (user.getStatus() == 0) {
-            throw new RuntimeException("用户已被禁用");
+            throw new RuntimeException("账号已被禁用");
         }
         String token = generateToken(user.getUsername());
         return new LoginResponse(token, user.getUsername(), user.getRealName(), "STUDENT");
@@ -64,7 +61,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User findByUsername(String username) {
-        return getOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, username);
+        return getOne(wrapper);
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        return getById(id);
     }
 
     private String generateToken(String username) {
