@@ -1,8 +1,13 @@
 package com.example.unionsystem.controller;
 
 import com.example.unionsystem.dto.response.ApiResponse;
+import com.example.unionsystem.entity.Activity;
 import com.example.unionsystem.entity.Summary;
+import com.example.unionsystem.service.ActivityService;
+import com.example.unionsystem.service.ClubMemberService;
 import com.example.unionsystem.service.SummaryService;
+import com.example.unionsystem.util.SecurityUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -10,6 +15,12 @@ import org.springframework.web.bind.annotation.*;
 public class SummaryController {
 
     private final SummaryService summaryService;
+    
+    @Autowired
+    private ActivityService activityService;
+    
+    @Autowired
+    private ClubMemberService clubMemberService;
 
     public SummaryController(SummaryService summaryService) {
         this.summaryService = summaryService;
@@ -45,6 +56,16 @@ public class SummaryController {
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable Long id) {
+        Long currentUserId = SecurityUtil.getCurrentUserId();
+        Summary summary = summaryService.getById(id);
+        if (summary != null) {
+            Activity activity = activityService.getById(summary.getActivityId());
+            if (activity != null && SecurityUtil.isClubManager() && currentUserId != null) {
+                if (!clubMemberService.isClubManager(currentUserId, activity.getClubId())) {
+                    throw new RuntimeException("您不是该社团的负责人，无权删除活动总结");
+                }
+            }
+        }
         summaryService.removeById(id);
         return ApiResponse.success("删除成功", null);
     }

@@ -6,6 +6,8 @@ import com.example.unionsystem.dto.request.RegisterRequest;
 import com.example.unionsystem.dto.response.LoginResponse;
 import com.example.unionsystem.entity.User;
 
+import java.util.List;
+
 public interface UserService extends IService<User> {
 
     LoginResponse login(LoginRequest request);
@@ -13,4 +15,12 @@ public interface UserService extends IService<User> {
     void register(RegisterRequest request);
 
     User findByUsername(String username);
+
+    List<User> listAllUsers();
+
+    User updateUserRole(Long userId, String role);
+
+    User updateUserStatus(Long userId, Integer status);
+
+    User getUserById(Long userId);
 }

@@ -6,10 +6,12 @@ CREATE TABLE IF NOT EXISTS `user` (
     `student_id` VARCHAR(20) UNIQUE COMMENT '学号',
     `email` VARCHAR(100) UNIQUE COMMENT '邮箱',
     `phone` VARCHAR(20) UNIQUE COMMENT '手机号',
+    `role` VARCHAR(50) DEFAULT 'STUDENT' COMMENT '角色：ADMIN-管理员，CLUB_MANAGER-社团负责人，STUDENT-普通用户',
     `status` TINYINT DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX `idx_username` (`username`)
+    INDEX `idx_username` (`username`),
+    INDEX `idx_role` (`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
 
 CREATE TABLE IF NOT EXISTS `role` (

@@ -18,6 +18,7 @@ import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
@@ -57,6 +58,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setStudentId(request.getStudentId());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
+        user.setRole("STUDENT");
         user.setStatus(1);
         save(user);
     }
@@ -66,6 +68,45 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, username);
         return getOne(wrapper);
+    }
+
+    @Override
+    public List<User> listAllUsers() {
+        return list();
+    }
+
+    @Override
+    public User updateUserRole(Long userId, String role) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        // 验证角色有效性
+        if (!"ADMIN".equals(role) && !"CLUB_MANAGER".equals(role) && !"STUDENT".equals(role)) {
+            throw new RuntimeException("无效的角色");
+        }
+        user.setRole(role);
+        updateById(user);
+        return user;
+    }
+
+    @Override
+    public User updateUserStatus(Long userId, Integer status) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        if (status != 0 && status != 1) {
+            throw new RuntimeException("无效的状态值");
+        }
+        user.setStatus(status);
+        updateById(user);
+        return user;
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        return getById(userId);
     }
 
     private String generateToken(String username) {

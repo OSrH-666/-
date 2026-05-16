@@ -34,15 +34,15 @@ INSERT INTO role_permission (role_id, permission_id) VALUES
 (3, 7), (3, 8), (3, 9), (3, 10), (3, 11);
 
 -- 插入用户数据 (密码为 BCrypt 加密的 '123456')
-INSERT INTO user (username, password, real_name, student_id, email, phone, status) VALUES 
-('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '系统管理员', '202400000000', 'admin@example.com', '13800138000', 1),
-('yangsiqin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '杨思勤', '202405567014', 'yangsiqin@example.com', '13800138001', 1),
-('guhua', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '古华', '202405567034', 'guhua@example.com', '13800138002', 1),
-('helinhan', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '何林晗', '202405567008', 'helinhan@example.com', '13800138003', 1),
-('jiangnanzhu', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '蒋南柱', '202405567007', 'jiangnanzhu@example.com', '13800138004', 1),
-('pengzihao', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '彭子皓', '202405567019', 'pengzihao@example.com', '13800138005', 1),
-('zhangsan', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '张三', '202405567020', 'zhangsan@example.com', '13800138006', 1),
-('lisi', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '李四', '202405567021', 'lisi@example.com', '13800138007', 1);
+INSERT INTO user (username, password, real_name, student_id, email, phone, role, status) VALUES 
+('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '系统管理员', '202400000000', 'admin@example.com', '13800138000', 'ADMIN', 1),
+('yangsiqin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '杨思勤', '202405567014', 'yangsiqin@example.com', '13800138001', 'CLUB_MANAGER', 1),
+('guhua', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '古华', '202405567034', 'guhua@example.com', '13800138002', 'CLUB_MANAGER', 1),
+('helinhan', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '何林晗', '202405567008', 'helinhan@example.com', '13800138003', 'STUDENT', 1),
+('jiangnanzhu', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '蒋南柱', '202405567007', 'jiangnanzhu@example.com', '13800138004', 'STUDENT', 1),
+('pengzihao', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '彭子皓', '202405567019', 'pengzihao@example.com', '13800138005', 'STUDENT', 1),
+('zhangsan', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '张三', '202405567020', 'zhangsan@example.com', '13800138006', 'STUDENT', 1),
+('lisi', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '李四', '202405567021', 'lisi@example.com', '13800138007', 'STUDENT', 1);
 
 -- 插入用户角色关联数据
 INSERT INTO user_role (user_id, role_id) VALUES 
