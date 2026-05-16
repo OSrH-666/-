@@ -14,8 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
+import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Service
@@ -40,7 +41,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new RuntimeException("账号已被禁用");
         }
         String token = generateToken(user.getUsername());
-        return new LoginResponse(token, user.getUsername(), user.getRealName(), "STUDENT");
+        String role = mapRole(user.getRole());
+        return new LoginResponse(token, user.getUsername(), user.getRealName(), role);
     }
 
     @Override
@@ -66,20 +68,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return getOne(wrapper);
     }
 
-    @Override
-    public User getUserById(Long id) {
-        return getById(id);
-    }
-
     private String generateToken(String username) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
+        
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
 
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
                 .compact();
+    }
+
+    private String mapRole(String role) {
+        if (role == null) {
+            return "student";
+        }
+        switch (role) {
+            case "ADMIN":
+                return "admin";
+            case "CLUB_MANAGER":
+                return "leader";
+            case "STUDENT":
+            default:
+                return "student";
+        }
     }
 }

@@ -1,0 +1,11 @@
+# 后端忽略
+target/
+*.iml
+.idea/
+*.log
+
+# 前端忽略
+node_modules/
+dist/
+.env
+.vite/

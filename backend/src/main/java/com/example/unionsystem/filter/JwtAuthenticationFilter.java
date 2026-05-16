@@ -13,6 +13,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
+import javax.crypto.SecretKey;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -44,8 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 User user = userService.findByUsername(username);
                 
                 if (user != null) {
+                    String role = user.getRole() != null ? user.getRole() : "STUDENT";
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            user, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_STUDENT")));
+                            user, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
@@ -66,10 +70,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getUsernameFromJwt(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJws(token)
-                .getBody();
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
         return claims.getSubject();
     }
 }

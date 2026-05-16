@@ -26,6 +26,8 @@ public class User {
     
     private String phone;
     
+    private String role;
+    
     private Integer status;
     
     private LocalDateTime createdAt;
