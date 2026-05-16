@@ -52,7 +52,13 @@
           <el-table :data="recentActivities">
             <el-table-column prop="name" label="活动名称" />
             <el-table-column prop="startTime" label="开始时间" />
-            <el-table-column prop="status" label="状态" />
+            <el-table-column prop="status" label="状态">
+              <template #default="scope">
+                <el-tag :type="getActivityStatusType(scope.row.status)">
+                  {{ getActivityStatusText(scope.row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
           </el-table>
         </el-card>
       </el-col>
@@ -60,7 +66,11 @@
         <el-card title="待审核组织">
           <el-table :data="pendingClubs">
             <el-table-column prop="name" label="组织名称" />
-            <el-table-column prop="type" label="类型" />
+            <el-table-column prop="type" label="类型">
+              <template #default="scope">
+                {{ getClubTypeText(scope.row.type) }}
+              </template>
+            </el-table-column>
             <el-table-column prop="createdAt" label="创建时间" />
           </el-table>
         </el-card>
@@ -81,10 +91,48 @@ const summaryCount = ref(0)
 const recentActivities = ref([])
 const pendingClubs = ref([])
 
+const getActivityStatusText = (status) => {
+  const map = { 
+    'active': '进行中', 
+    'pending': '待审核', 
+    'completed': '已结束',
+    0: '草稿',
+    1: '进行中',
+    2: '已结束'
+  }
+  return map[status] || status
+}
+
+const getActivityStatusType = (status) => {
+  const map = { 
+    'active': 'success', 
+    'pending': 'warning', 
+    'completed': 'info',
+    0: 'info',
+    1: 'success',
+    2: 'info'
+  }
+  return map[status] || ''
+}
+
+const getClubTypeText = (type) => {
+  const map = { 
+    'academic': '学术科技', 
+    'art': '文体艺术', 
+    'volunteer': '公益志愿', 
+    'other': '其他',
+    0: '学术科技',
+    1: '文体艺术',
+    2: '公益志愿',
+    3: '其他'
+  }
+  return map[type] || type
+}
+
 onMounted(async () => {
   const clubs = await clubApi.list()
   clubCount.value = clubs.data?.length || 0
-  pendingClubs.value = clubs.data?.filter(c => c.status === 0) || []
+  pendingClubs.value = clubs.data?.filter(c => c.status === 0 || c.status === 'pending') || []
 
   const activities = await activityApi.list()
   activityCount.value = activities.data?.length || 0
