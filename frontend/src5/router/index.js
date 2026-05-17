@@ -11,6 +11,8 @@ import StudentActivityList from '../views/StudentActivityList.vue'
 import StudentActivityDetail from '../views/StudentActivityDetail.vue'
 import StudentRegistrationList from '../views/StudentRegistrationList.vue'
 import StudentProfile from '../views/StudentProfile.vue'
+import StudentProfileEdit from '../views/StudentProfileEdit.vue'
+import StudentChangePassword from '../views/StudentChangePassword.vue'
 
 // 负责人端页面
 import LeaderDashboard from '../views/LeaderDashboard.vue'
@@ -29,6 +31,8 @@ import LeaderSummaryDetail from '../views/LeaderSummaryDetail.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
 import AdminUsers from '../views/AdminUsers.vue'
 import AdminClubs from '../views/AdminClubs.vue'
+import AdminClubDetail from '../views/AdminClubDetail.vue'
+import UserForm from '../views/UserForm.vue'
 import AdminStatistics from '../views/AdminStatistics.vue'
 import AdminSettings from '../views/AdminSettings.vue'
 
@@ -56,7 +60,9 @@ const routes = [
       { path: 'activities', name: 'StudentActivityList', component: StudentActivityList, meta: { title: '活动列表' } },
       { path: 'activities/detail/:id', name: 'StudentActivityDetail', component: StudentActivityDetail, meta: { title: '活动详情' } },
       { path: 'registrations', name: 'StudentRegistrationList', component: StudentRegistrationList, meta: { title: '我的报名' } },
-      { path: 'profile', name: 'StudentProfile', component: StudentProfile, meta: { title: '个人中心' } }
+      { path: 'profile', name: 'StudentProfile', component: StudentProfile, meta: { title: '个人中心' } },
+      { path: 'profile/edit', name: 'StudentProfileEdit', component: StudentProfileEdit, meta: { title: '修改资料' } },
+      { path: 'profile/change-password', name: 'StudentChangePassword', component: StudentChangePassword, meta: { title: '修改密码' } }
     ]
   },
   {
@@ -86,7 +92,10 @@ const routes = [
     children: [
       { path: '', name: 'AdminDashboard', component: AdminDashboard, meta: { title: '管理员首页' } },
       { path: 'users', name: 'AdminUsers', component: AdminUsers, meta: { title: '用户管理' } },
+      { path: 'users/add', name: 'AdminUserAdd', component: UserForm, meta: { title: '添加用户' } },
+      { path: 'users/edit/:id', name: 'AdminUserEdit', component: UserForm, meta: { title: '编辑用户' } },
       { path: 'clubs', name: 'AdminClubs', component: AdminClubs, meta: { title: '组织审核' } },
+      { path: 'clubs/detail/:id', name: 'AdminClubDetail', component: AdminClubDetail, meta: { title: '组织详情' } },
       { path: 'statistics', name: 'AdminStatistics', component: AdminStatistics, meta: { title: '系统统计' } },
       { path: 'settings', name: 'AdminSettings', component: AdminSettings, meta: { title: '系统配置' } }
     ]
