@@ -1,100 +1,140 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.18</version>
-        <relativePath/>
-    </parent>
-    
-    <groupId>com.example</groupId>
-    <artifactId>college-student-union-management-system</artifactId>
-    <version>1.0.0</version>
-    <name>college-student-union-management-system</name>
-    <description>大学生社团学生会信息管理系统</description>
-    
-    <properties>
-        <java.version>11</java.version>
-        <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
-        <jjwt.version>0.9.1</jjwt.version>
-    </properties>
-    
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
+package com.example.unionsystem.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.unionsystem.dto.request.LoginRequest;
+import com.example.unionsystem.dto.request.RegisterRequest;
+import com.example.unionsystem.dto.response.LoginResponse;
+import com.example.unionsystem.entity.User;
+import com.example.unionsystem.mapper.UserMapper;
+import com.example.unionsystem.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+import java.util.List;
+
+@Service
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration}")
+    private Long jwtExpiration;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public LoginResponse login(LoginRequest request) {
+        User user = findByUsername(request.getUsername());
+        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("用户名或密码错误");
+        }
+        if (user.getStatus() == 0) {
+            throw new RuntimeException("账号已被禁用");
+        }
+        String token = generateToken(user.getUsername());
+        String role = mapRole(user.getRole());
+        return new LoginResponse(token, user.getUsername(), user.getRealName(), role);
+    }
+
+    @Override
+    public void register(RegisterRequest request) {
+        if (findByUsername(request.getUsername()) != null) {
+            throw new RuntimeException("用户名已存在");
+        }
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRealName(request.getRealName());
+        user.setStudentId(request.getStudentId());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setRole("STUDENT");
+        user.setStatus(1);
+        save(user);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, username);
+        return getOne(wrapper);
+    }
+
+    @Override
+    public List<User> listAllUsers() {
+        return list();
+    }
+
+    @Override
+    public User updateUserRole(Long userId, String role) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        // 验证角色有效性
+        if (!"ADMIN".equals(role) && !"CLUB_MANAGER".equals(role) && !"STUDENT".equals(role)) {
+            throw new RuntimeException("无效的角色");
+        }
+        user.setRole(role);
+        updateById(user);
+        return user;
+    }
+
+    @Override
+    public User updateUserStatus(Long userId, Integer status) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        if (status != 0 && status != 1) {
+            throw new RuntimeException("无效的状态值");
+        }
+        user.setStatus(status);
+        updateById(user);
+        return user;
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        return getById(userId);
+    }
+
+    private String generateToken(String username) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpiration);
         
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>${mybatis-plus.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.45.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-extension</artifactId>
-            <version>${mybatis-plus.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>${jjwt.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-</project>
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+
+        return Jwts.builder()
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key)
+                .compact();
+    }
+
+    private String mapRole(String role) {
+        if (role == null) {
+            return "student";
+        }
+        switch (role) {
+            case "ADMIN":
+                return "admin";
+            case "CLUB_MANAGER":
+                return "leader";
+            case "STUDENT":
+            default:
+                return "student";
+        }
+    }
+}
