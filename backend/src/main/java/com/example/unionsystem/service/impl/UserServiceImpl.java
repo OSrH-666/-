@@ -2,8 +2,10 @@ package com.example.unionsystem.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.unionsystem.dto.request.ChangePasswordRequest;
 import com.example.unionsystem.dto.request.LoginRequest;
 import com.example.unionsystem.dto.request.RegisterRequest;
+import com.example.unionsystem.dto.request.UpdateProfileRequest;
 import com.example.unionsystem.dto.response.LoginResponse;
 import com.example.unionsystem.entity.User;
 import com.example.unionsystem.mapper.UserMapper;
@@ -107,6 +109,53 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public User getUserById(Long userId) {
         return getById(userId);
+    }
+
+    @Override
+    public User updateProfile(Long userId, UpdateProfileRequest request) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        if (request.getRealName() != null) {
+            user.setRealName(request.getRealName());
+        }
+        if (request.getStudentId() != null) {
+            user.setStudentId(request.getStudentId());
+        }
+        if (request.getEmail() != null) {
+            user.setEmail(request.getEmail());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getGrade() != null) {
+            user.setGrade(request.getGrade());
+        }
+        if (request.getMajor() != null) {
+            user.setMajor(request.getMajor());
+        }
+        if (request.getClassName() != null) {
+            user.setClassName(request.getClassName());
+        }
+        if (request.getAvatarUrl() != null) {
+            user.setAvatarUrl(request.getAvatarUrl());
+        }
+        updateById(user);
+        return user;
+    }
+
+    @Override
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("旧密码不正确");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        updateById(user);
     }
 
     private String generateToken(String username) {

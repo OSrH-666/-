@@ -8,23 +8,23 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("club_member")
-public class ClubMember {
+@TableName("registration")
+public class Registration {
 
     @TableId(type = IdType.AUTO)
     private Long id;
     
-    private Long clubId;
+    private Long activityId;
     
     private Long userId;
     
-    private Integer role;
-    
     private Integer status;
     
-    private LocalDateTime joinedAt;
+    private Integer queuePosition;
     
-    private LocalDateTime createdAt;
+    private LocalDateTime registeredAt;
+    
+    private LocalDateTime confirmedAt;
     
     private LocalDateTime updatedAt;
 }
