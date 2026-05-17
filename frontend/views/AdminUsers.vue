@@ -47,8 +47,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
+const router = useRouter()
 const searchKeyword = ref('')
 const roleFilter = ref('')
 const users = ref([
@@ -88,9 +90,13 @@ const getRoleTagType = (role) => {
 
 const search = () => {}
 
-const goToAdd = () => {}
+const goToAdd = () => {
+  router.push('/admin/users/add')
+}
 
-const editUser = (id) => {}
+const editUser = (id) => {
+  router.push(`/admin/users/edit/${id}`)
+}
 
 const resetPassword = (id) => {
   ElMessage.success('密码已重置为默认值')
