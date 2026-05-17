@@ -1,113 +1,162 @@
 <template>
   <div class="admin-dashboard">
     <el-row :gutter="20">
+      <el-col :span="24">
+        <div class="welcome-card">
+          <h2>系统管理后台</h2>
+          <p>管理员 · {{ userInfo.realName || userInfo.username }}</p>
+          <p class="date">{{ currentDate }}</p>
+        </div>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20" style="margin-top: 20px;">
       <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-icon blue">
-            <el-icon><Users /></el-icon>
-          </div>
-          <div class="stat-content">
-            <p class="stat-value">{{ userCount }}</p>
-            <p class="stat-label">用户总数</p>
+        <el-card shadow="hover">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <el-icon><User /></el-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ stats.userCount }}</h3>
+              <p>系统用户</p>
+            </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-icon green">
-            <el-icon><Briefcase /></el-icon>
-          </div>
-          <div class="stat-content">
-            <p class="stat-value">{{ clubCount }}</p>
-            <p class="stat-label">组织总数</p>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-icon orange">
-            <el-icon><Clock /></el-icon>
-          </div>
-          <div class="stat-content">
-            <p class="stat-value">{{ pendingClubs }}</p>
-            <p class="stat-label">待审核组织</p>
+        <el-card shadow="hover">
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <el-icon><OfficeBuilding /></el-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ stats.clubCount }}</h3>
+              <p>学生社团</p>
+            </div>
           </div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-icon purple">
-            <el-icon><Calendar /></el-icon>
+        <el-card shadow="hover">
+          <div class="stat-card">
+            <div class="stat-icon orange">
+              <el-icon><Calendar /></el-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ stats.activityCount }}</h3>
+              <p>活动总数</p>
+            </div>
           </div>
-          <div class="stat-content">
-            <p class="stat-value">{{ activityCount }}</p>
-            <p class="stat-label">活动总数</p>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover">
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <el-icon><Ticket /></el-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ stats.registrationCount }}</h3>
+              <p>报名记录</p>
+            </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row style="margin-top: 20px;">
+    <el-row :gutter="20" style="margin-top: 20px;">
+      <el-col :span="8">
+        <el-card>
+          <template #header>
+            <span>系统概览</span>
+          </template>
+          <div class="overview-list">
+            <div class="overview-item">
+              <span>学生会成员</span>
+              <span class="value">{{ stats.unionMembers }}</span>
+            </div>
+            <div class="overview-item">
+              <span>学生会动态</span>
+              <span class="value">{{ stats.unionNews }}</span>
+            </div>
+            <div class="overview-item">
+              <span>活跃社团</span>
+              <span class="value">{{ stats.activeClubs }}</span>
+            </div>
+            <div class="overview-item">
+              <span>本月活动</span>
+              <span class="value">{{ stats.monthlyActivities }}</span>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card>
+          <template #header>
+            <div class="card-header">
+              <span>待处理事项</span>
+            </div>
+          </template>
+          <div class="todo-list">
+            <div v-for="todo in todos" :key="todo.id" class="todo-item">
+              <div class="todo-info">
+                <el-tag :type="todo.type" size="small">{{ todo.tag }}</el-tag>
+                <span>{{ todo.content }}</span>
+              </div>
+              <el-button size="small" type="primary" plain @click="goToPage(todo.path)">处理</el-button>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card>
+          <template #header>
+            <span>快捷管理</span>
+          </template>
+          <div class="quick-actions">
+            <el-button type="primary" @click="goTo('/users')">用户管理</el-button>
+            <el-button type="success" @click="goTo('/clubs')">社团管理</el-button>
+            <el-button type="warning" @click="goTo('/activities')">活动管理</el-button>
+            <el-button type="info" @click="goTo('/union/info')">学生会设置</el-button>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20" style="margin-top: 20px;">
       <el-col :span="12">
-        <el-card title="组织审核列表">
-          <el-table :data="pendingClubList" @row-click="handleClubClick">
-            <el-table-column prop="name" label="组织名称" />
-            <el-table-column prop="description" label="描述" show-overflow-tooltip />
-            <el-table-column prop="createdAt" label="创建时间" />
-            <el-table-column prop="status" label="状态">
+        <el-card>
+          <template #header>
+            <span>最新活动报名</span>
+          </template>
+          <el-table :data="recentActivities" border>
+            <el-table-column prop="activityName" label="活动名称" />
+            <el-table-column prop="registeredCount" label="报名人数" width="100" />
+            <el-table-column prop="maxParticipants" label="上限" width="80" />
+            <el-table-column prop="status" label="状态" width="100">
               <template #default="scope">
-                <el-tag type="warning">{{ getStatusText(scope.row.status) }}</el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作">
-              <template #default="scope">
-                <el-button type="primary" size="small" @click.stop="approveClub(scope.row.id)">通过</el-button>
-                <el-button size="small" @click.stop="rejectClub(scope.row.id)">拒绝</el-button>
+                <el-tag :type="getStatusType(scope.row.status)">{{ scope.row.status }}</el-tag>
               </template>
             </el-table-column>
           </el-table>
         </el-card>
       </el-col>
-
       <el-col :span="12">
-        <el-card title="系统统计">
-          <div class="chart-section">
-            <h4>角色分布</h4>
-            <div class="role-chart">
-              <div v-for="role in roleStats" :key="role.name" class="role-item">
-                <span class="role-name">{{ role.name }}</span>
-                <div class="role-bar">
-                  <div class="role-fill" :style="{ width: role.percent + '%', backgroundColor: role.color }"></div>
-                </div>
-                <span class="role-count">{{ role.count }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="chart-section" style="margin-top: 20px;">
-            <h4>组织类型分布</h4>
-            <div class="pie-chart">
-              <svg viewBox="0 0 100 100">
-                <circle 
-                  v-for="(item, index) in clubTypeStats" 
-                  :key="item.name"
-                  :cx="50" :cy="50" :r="40"
-                  :fill="item.color"
-                  :stroke="item.color"
-                  :stroke-width="20"
-                  :stroke-dasharray="item.dashArray"
-                  :stroke-dashoffset="item.dashOffset"
-                  transform="rotate(-90 50 50)"
-                  style="fill: none;"
-                />
-              </svg>
-              <div class="pie-legend">
-                <div v-for="item in clubTypeStats" :key="item.name" class="legend-item">
-                  <span class="legend-color" :style="{ backgroundColor: item.color }"></span>
-                  <span>{{ item.name }} ({{ item.count }})</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <el-card>
+          <template #header>
+            <span>最新用户注册</span>
+          </template>
+          <el-table :data="recentUsers" border>
+            <el-table-column prop="username" label="用户名" />
+            <el-table-column prop="realName" label="姓名" />
+            <el-table-column prop="role" label="角色">
+              <template #default="scope">
+                <el-tag :type="getRoleTagType(scope.row.role)">{{ getRoleText(scope.row.role) }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="createdAt" label="注册时间" />
+          </el-table>
         </el-card>
       </el-col>
     </el-row>
@@ -117,215 +166,182 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Users, Briefcase, Clock, Calendar } from '@element-plus/icons-vue'
-import { clubApi, activityApi } from '../api'
-import { ElMessage } from 'element-plus'
+import { User, OfficeBuilding, Calendar, Ticket } from '@element-plus/icons-vue'
 
 const router = useRouter()
-const userCount = ref(0)
-const clubCount = ref(0)
-const pendingClubs = ref(0)
-const activityCount = ref(0)
-const pendingClubList = ref([])
+const userInfo = ref({})
+const currentDate = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
 
-const roleStats = ref([
-  { name: '学生', count: 0, percent: 70, color: '#409EFF' },
-  { name: '负责人', count: 0, percent: 20, color: '#67C23A' },
-  { name: '管理员', count: 0, percent: 10, color: '#E6A23C' }
+const stats = ref({
+  userCount: 156,
+  clubCount: 12,
+  activityCount: 48,
+  registrationCount: 892,
+  unionMembers: 24,
+  unionNews: 18,
+  activeClubs: 10,
+  monthlyActivities: 8
+})
+
+const todos = ref([
+  { id: 1, type: 'warning', tag: '报名', content: '12 个报名待处理', path: '/registrations' },
+  { id: 2, type: 'success', tag: '社团', content: '3 个社团待审核', path: '/clubs' },
+  { id: 3, type: 'info', tag: '用户', content: '5 个新用户待激活', path: '/users' }
 ])
 
-const clubTypeStats = ref([
-  { name: '学术科技', count: 0, color: '#409EFF', dashArray: '', dashOffset: '' },
-  { name: '文体艺术', count: 0, color: '#67C23A', dashArray: '', dashOffset: '' },
-  { name: '公益志愿', count: 0, color: '#E6A23C', dashArray: '', dashOffset: '' },
-  { name: '其他', count: 0, color: '#909399', dashArray: '', dashOffset: '' }
+const recentActivities = ref([
+  { activityName: 'AI技术分享会', registeredCount: 45, maxParticipants: 50, status: '报名中' },
+  { activityName: '编程大赛', registeredCount: 30, maxParticipants: 30, status: '已满' },
+  { activityName: '迎新晚会', registeredCount: 200, maxParticipants: 300, status: '报名中' },
+  { activityName: '志愿服务', registeredCount: 25, maxParticipants: 20, status: '已满' }
 ])
 
-const getStatusText = (status) => {
-  const map = { pending: '待审核', approved: '已通过', rejected: '已拒绝' }
-  return map[status] || '未知'
+const recentUsers = ref([
+  { username: 'wangwu', realName: '王五', role: 'STUDENT', createdAt: '2024-12-10' },
+  { username: 'zhaoliu', realName: '赵六', role: 'STUDENT', createdAt: '2024-12-09' },
+  { username: 'sunqi', realName: '孙七', role: 'CLUB_MANAGER', createdAt: '2024-12-08' },
+  { username: 'zhouba', realName: '周八', role: 'STUDENT', createdAt: '2024-12-07' }
+])
+
+const getStatusType = (status) => {
+  const map = { '报名中': 'success', '已满': 'warning', '已结束': 'info' }
+  return map[status] || ''
 }
 
-const handleClubClick = (row) => {
-  router.push(`/admin/clubs/detail/${row.id}`)
+const getRoleText = (role) => {
+  const map = { 'STUDENT': '学生', 'CLUB_MANAGER': '负责人', 'ADMIN': '管理员' }
+  return map[role] || '未知'
 }
 
-const approveClub = (id) => {
-  ElMessage.success('已通过组织审核')
-  pendingClubList.value = pendingClubList.value.filter(c => c.id !== id)
+const getRoleTagType = (role) => {
+  const map = { 'STUDENT': 'info', 'CLUB_MANAGER': 'success', 'ADMIN': 'warning' }
+  return map[role] || 'info'
 }
 
-const rejectClub = (id) => {
-  ElMessage.info('已拒绝组织审核')
-  pendingClubList.value = pendingClubList.value.filter(c => c.id !== id)
+const goTo = (path) => {
+  router.push(path)
 }
 
-const calculatePieChart = () => {
-  const total = clubTypeStats.value.reduce((sum, item) => sum + item.count, 0)
-  let offset = 0
-  const circumference = 2 * Math.PI * 40
-  
-  clubTypeStats.value.forEach(item => {
-    const percent = total > 0 ? item.count / total : 0
-    item.dashArray = `${percent * circumference} ${circumference}`
-    item.dashOffset = -offset
-    offset += percent * circumference
-  })
+const goToPage = (path) => {
+  router.push(path)
 }
 
-onMounted(async () => {
-  const clubsRes = await clubApi.list()
-  const clubs = clubsRes.data || []
-  clubCount.value = clubs.length
-  pendingClubList.value = clubs.filter(c => c.status === 'pending')
-  pendingClubs.value = pendingClubList.value.length
-
-  const activitiesRes = await activityApi.list()
-  activityCount.value = activitiesRes.data?.length || 0
-
-  userCount.value = 1256
-  roleStats.value = [
-    { name: '学生', count: 1100, percent: 87.6, color: '#409EFF' },
-    { name: '负责人', count: 130, percent: 10.3, color: '#67C23A' },
-    { name: '管理员', count: 26, percent: 2.1, color: '#E6A23C' }
-  ]
-
-  clubTypeStats.value = [
-    { name: '学术科技', count: 25, color: '#409EFF', dashArray: '', dashOffset: '' },
-    { name: '文体艺术', count: 18, color: '#67C23A', dashArray: '', dashOffset: '' },
-    { name: '公益志愿', count: 12, color: '#E6A23C', dashArray: '', dashOffset: '' },
-    { name: '其他', count: 5, color: '#909399', dashArray: '', dashOffset: '' }
-  ]
-
-  calculatePieChart()
+onMounted(() => {
+  const user = localStorage.getItem('user')
+  if (user) {
+    userInfo.value = JSON.parse(user)
+  }
 })
 </script>
 
 <style scoped>
+.welcome-card {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 8px;
+}
+
+.welcome-card h2 {
+  margin: 0 0 5px 0;
+}
+
+.welcome-card p {
+  margin: 0 0 5px 0;
+  opacity: 0.9;
+}
+
+.welcome-card .date {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .stat-card {
   display: flex;
   align-items: center;
-  padding: 20px;
+  gap: 15px;
 }
 
 .stat-icon {
-  font-size: 48px;
-  margin-right: 20px;
-  padding: 15px;
-  border-radius: 12px;
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.stat-icon.blue {
-  color: #409EFF;
-  background-color: #ECF5FF;
+.stat-icon .el-icon {
+  font-size: 24px;
+  color: white;
 }
 
-.stat-icon.green {
-  color: #67C23A;
-  background-color: #F0F9EB;
-}
+.stat-icon.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.stat-icon.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.stat-icon.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.stat-icon.purple { background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); }
 
-.stat-icon.orange {
-  color: #E6A23C;
-  background-color: #FDF6EC;
-}
-
-.stat-icon.purple {
-  color: #909399;
-  background-color: #F5F5F5;
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: bold;
+.stat-info h3 {
   margin: 0;
-  color: #303133;
+  font-size: 28px;
+  font-weight: bold;
 }
 
-.stat-label {
-  color: #909399;
-  margin: 5px 0 0 0;
-}
-
-.chart-section h4 {
-  margin: 0 0 10px 0;
+.stat-info p {
+  margin: 0;
+  color: #666;
   font-size: 14px;
 }
 
-.role-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.overview-list {
+  padding: 10px 0;
 }
 
-.role-item {
+.overview-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.overview-item:last-child {
+  border-bottom: none;
+}
+
+.overview-item .value {
+  font-weight: bold;
+  color: #409EFF;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.todo-item:last-child {
+  border-bottom: none;
+}
+
+.todo-info {
   display: flex;
   align-items: center;
   gap: 10px;
+  font-size: 14px;
 }
 
-.role-name {
-  width: 50px;
-  font-size: 13px;
-}
-
-.role-bar {
-  flex: 1;
-  height: 12px;
-  background-color: #E4E7ED;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.role-fill {
-  height: 100%;
-  border-radius: 6px;
-  transition: width 0.3s;
-}
-
-.role-count {
-  width: 40px;
-  text-align: right;
-  font-size: 13px;
-  color: #606266;
-}
-
-.pie-chart {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.pie-chart svg {
-  width: 120px;
-  height: 120px;
-}
-
-.pie-legend {
-  flex: 1;
+.quick-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-.legend-item span {
-  font-size: 13px;
-  color: #606266;
+  gap: 10px;
 }
 </style>

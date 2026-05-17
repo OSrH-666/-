@@ -8,7 +8,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import Layout from './components/Layout/index.vue'
+import Layout from './components/Layout/MainLayout.vue'
 
 const route = useRoute()
 
