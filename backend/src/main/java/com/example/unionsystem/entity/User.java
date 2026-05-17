@@ -30,6 +30,14 @@ public class User {
     
     private Integer status;
     
+    private String grade;
+    
+    private String major;
+    
+    private String className;
+    
+    private String avatarUrl;
+    
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
