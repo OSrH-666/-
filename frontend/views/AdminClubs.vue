@@ -3,10 +3,10 @@
     <el-card>
       <div class="action-bar">
         <el-select v-model="statusFilter" placeholder="状态筛选">
-          <el-option label="全部" :value="null" />
-          <el-option label="待审核" :value="0" />
-          <el-option label="已通过" :value="1" />
-          <el-option label="已拒绝" :value="2" />
+          <el-option label="全部" value="" />
+          <el-option label="待审核" value="pending" />
+          <el-option label="已通过" value="approved" />
+          <el-option label="已拒绝" value="rejected" />
         </el-select>
         <el-button type="primary" @click="refresh">刷新列表</el-button>
       </div>
@@ -28,7 +28,7 @@
         </el-table-column>
         <el-table-column label="操作">
           <template #default="scope">
-            <template v-if="scope.row.status === 0">
+            <template v-if="scope.row.status === 'pending'">
               <el-button size="small" type="primary" @click="approveClub(scope.row.id)">通过</el-button>
               <el-button size="small" @click="rejectClub(scope.row.id)">拒绝</el-button>
             </template>
@@ -45,100 +45,67 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { clubApi } from '../src2/api'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
+import { clubApi } from '../api'
+import { ElMessage } from 'element-plus'
 
-const statusFilter = ref(null)
+const router = useRouter()
+const statusFilter = ref('')
 const clubs = ref([])
 
 const filteredClubs = computed(() => {
-  if (statusFilter.value === null) return clubs.value
+  if (!statusFilter.value) return clubs.value
   return clubs.value.filter(c => c.status === statusFilter.value)
 })
 
 const getTypeText = (type) => {
-  const map = { 0: '学术科技', 1: '文体艺术', 2: '公益志愿', 3: '其他' }
+  const map = { academic: '学术科技', art: '文体艺术', volunteer: '公益志愿', other: '其他' }
   return map[type] || '综合'
 }
 
 const getStatusText = (status) => {
-  const map = { 0: '待审核', 1: '已通过', 2: '已拒绝' }
+  const map = { pending: '待审核', approved: '已通过', rejected: '已拒绝' }
   return map[status] || '未知'
 }
 
 const getStatusType = (status) => {
-  const map = { 0: 'warning', 1: 'success', 2: 'danger' }
+  const map = { pending: 'warning', approved: 'success', rejected: 'danger' }
   return map[status] || ''
 }
 
 const refresh = async () => {
-  try {
-    const response = await clubApi.list()
-    clubs.value = response.data || []
-  } catch (error) {
-    ElMessage.error('获取列表失败')
-    console.error(error)
-  }
+  const response = await clubApi.list()
+  clubs.value = response.data || []
 }
 
-const approveClub = async (id) => {
-  try {
-    await ElMessageBox.confirm('确定要通过该组织的审核吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-    await clubApi.audit(id, 1)
+const approveClub = (id) => {
+  const club = clubs.value.find(c => c.id === id)
+  if (club) {
+    club.status = 'approved'
     ElMessage.success('已通过审核')
-    refresh()
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('操作失败')
-      console.error(error)
-    }
   }
 }
 
-const rejectClub = async (id) => {
-  try {
-    await ElMessageBox.confirm('确定要拒绝该组织的审核吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-    await clubApi.audit(id, 2)
+const rejectClub = (id) => {
+  const club = clubs.value.find(c => c.id === id)
+  if (club) {
+    club.status = 'rejected'
     ElMessage.info('已拒绝审核')
-    refresh()
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('操作失败')
-      console.error(error)
-    }
   }
 }
 
-const viewDetail = (id) => {}
+const viewDetail = (id) => {
+  router.push(`/admin/clubs/detail/${id}`)
+}
 
-const deleteClub = async (id) => {
-  try {
-    await ElMessageBox.confirm('确定要删除该组织吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-    await clubApi.delete(id)
-    ElMessage.success('组织已删除')
-    refresh()
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败')
-      console.error(error)
-    }
-  }
+const deleteClub = (id) => {
+  clubs.value = clubs.value.filter(c => c.id !== id)
+  ElMessage.success('组织已删除')
 }
 
 onMounted(async () => {
-  refresh()
+  const response = await clubApi.list()
+  clubs.value = response.data || []
 })
 </script>
 
