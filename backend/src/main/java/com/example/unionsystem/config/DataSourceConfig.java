@@ -49,6 +49,10 @@ public class DataSourceConfig {
                 "phone VARCHAR(20)," +
                 "role VARCHAR(20) DEFAULT 'STUDENT'," +
                 "status INTEGER DEFAULT 1," +
+                "grade VARCHAR(10)," +
+                "major VARCHAR(100)," +
+                "class_name VARCHAR(50)," +
+                "avatar_url VARCHAR(500)," +
                 "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
                 "updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
         
