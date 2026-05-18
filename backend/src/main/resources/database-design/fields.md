@@ -11,6 +11,11 @@
 | student_id | VARCHAR | 20 | - | 学号 |
 | email | VARCHAR | 100 | - | 邮箱地址 |
 | phone | VARCHAR | 20 | - | 手机号码 |
+| role | VARCHAR | 50 | DEFAULT 'STUDENT' | 角色：ADMIN-管理员，CLUB_MANAGER-社团负责人，STUDENT-普通用户 |
+| grade | VARCHAR | 20 | - | 年级 |
+| major | VARCHAR | 50 | - | 专业 |
+| class_name | VARCHAR | 50 | - | 班级 |
+| avatar_url | VARCHAR | 255 | - | 头像URL |
 | status | INTEGER | - | DEFAULT 1 | 状态：0-禁用，1-启用 |
 | created_at | TIMESTAMP | - | DEFAULT CURRENT_TIMESTAMP | 创建时间 |
 | updated_at | TIMESTAMP | - | DEFAULT CURRENT_TIMESTAMP | 更新时间 |
@@ -91,6 +96,7 @@
 | activity_id | INTEGER | - | FOREIGN KEY | 活动ID，关联activity表 |
 | content | TEXT | - | - | 总结内容 |
 | attachment_url | VARCHAR | 500 | - | 附件URL |
+| status | INTEGER | - | DEFAULT 0 | 状态：0-待审核，1-通过，2-拒绝 |
 | created_at | TIMESTAMP | - | DEFAULT CURRENT_TIMESTAMP | 创建时间 |
 | updated_at | TIMESTAMP | - | DEFAULT CURRENT_TIMESTAMP | 更新时间 |
 
