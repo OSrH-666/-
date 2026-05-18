@@ -10,4 +10,8 @@ public interface SummaryService extends IService<Summary> {
     Summary updateSummary(Long id, String content, String attachmentUrl);
 
     Summary findByActivityId(Long activityId);
+
+    Summary approveSummary(Long id);
+
+    Summary rejectSummary(Long id);
 }
