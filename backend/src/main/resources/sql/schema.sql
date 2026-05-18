@@ -1,138 +1,155 @@
-CREATE TABLE IF NOT EXISTS `user` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '用户ID',
-    `username` VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
-    `password` VARCHAR(255) NOT NULL COMMENT '密码',
-    `real_name` VARCHAR(50) NOT NULL COMMENT '真实姓名',
-    `student_id` VARCHAR(20) UNIQUE COMMENT '学号',
-    `email` VARCHAR(100) UNIQUE COMMENT '邮箱',
-    `phone` VARCHAR(20) UNIQUE COMMENT '手机号',
-    `role` VARCHAR(50) DEFAULT 'STUDENT' COMMENT '角色：ADMIN-管理员，CLUB_MANAGER-社团负责人，STUDENT-普通用户',
-    `status` TINYINT DEFAULT 1 COMMENT '状态：0-禁用，1-启用',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX `idx_username` (`username`),
-    INDEX `idx_role` (`role`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+-- 大学生学生会管理系统 - 数据库建表SQL (SQLite)
 
-CREATE TABLE IF NOT EXISTS `role` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '角色ID',
-    `name` VARCHAR(50) NOT NULL UNIQUE COMMENT '角色名称',
-    `code` VARCHAR(50) NOT NULL UNIQUE COMMENT '角色编码',
-    `description` VARCHAR(200) COMMENT '角色描述',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX `idx_code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色表';
+-- 用户表
+CREATE TABLE IF NOT EXISTS user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    real_name VARCHAR(50),
+    student_id VARCHAR(20),
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    role VARCHAR(50) DEFAULT 'STUDENT',
+    grade VARCHAR(20),
+    major VARCHAR(50),
+    class_name VARCHAR(50),
+    avatar_url VARCHAR(255),
+    status INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE TABLE IF NOT EXISTS `user_role` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
-    `user_id` BIGINT NOT NULL COMMENT '用户ID',
-    `role_id` BIGINT NOT NULL COMMENT '角色ID',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    UNIQUE KEY `uk_user_role` (`user_id`, `role_id`),
-    INDEX `idx_user_id` (`user_id`),
-    INDEX `idx_role_id` (`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户角色关联表';
+-- 角色表
+CREATE TABLE IF NOT EXISTS role (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(200),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE TABLE IF NOT EXISTS `permission` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '权限ID',
-    `name` VARCHAR(50) NOT NULL COMMENT '权限名称',
-    `code` VARCHAR(100) NOT NULL UNIQUE COMMENT '权限编码',
-    `description` VARCHAR(200) COMMENT '权限描述',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX `idx_code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='权限表';
+-- 用户角色关联表
+CREATE TABLE IF NOT EXISTS user_role (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    role_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, role_id)
+);
 
-CREATE TABLE IF NOT EXISTS `role_permission` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
-    `role_id` BIGINT NOT NULL COMMENT '角色ID',
-    `permission_id` BIGINT NOT NULL COMMENT '权限ID',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    UNIQUE KEY `uk_role_permission` (`role_id`, `permission_id`),
-    INDEX `idx_role_id` (`role_id`),
-    INDEX `idx_permission_id` (`permission_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色权限关联表';
+-- 权限表
+CREATE TABLE IF NOT EXISTS permission (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(50) NOT NULL,
+    code VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(200),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE TABLE IF NOT EXISTS `club` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '组织ID',
-    `name` VARCHAR(100) NOT NULL COMMENT '组织名称',
-    `type` TINYINT NOT NULL COMMENT '组织类型：1-社团，2-学生会',
-    `description` TEXT COMMENT '组织描述',
-    `logo_url` VARCHAR(255) COMMENT 'Logo地址',
-    `status` TINYINT DEFAULT 0 COMMENT '状态：0-待审核，1-通过，2-拒绝',
-    `founder_id` BIGINT NOT NULL COMMENT '创建者ID',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX `idx_name` (`name`),
-    INDEX `idx_status` (`status`),
-    INDEX `idx_founder_id` (`founder_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='组织表';
+-- 角色权限关联表
+CREATE TABLE IF NOT EXISTS role_permission (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    role_id INTEGER NOT NULL,
+    permission_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(role_id, permission_id)
+);
 
-CREATE TABLE IF NOT EXISTS `club_member` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
-    `club_id` BIGINT NOT NULL COMMENT '组织ID',
-    `user_id` BIGINT NOT NULL COMMENT '用户ID',
-    `role` TINYINT DEFAULT 0 COMMENT '组织内角色：0-普通成员，1-负责人',
-    `status` TINYINT DEFAULT 0 COMMENT '状态：0-待审核，1-通过，2-拒绝',
-    `joined_at` DATETIME COMMENT '加入时间',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY `uk_club_user` (`club_id`, `user_id`),
-    INDEX `idx_club_id` (`club_id`),
-    INDEX `idx_user_id` (`user_id`),
-    INDEX `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='组织成员表';
+-- 社团表
+CREATE TABLE IF NOT EXISTS club (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(100) NOT NULL,
+    type INTEGER NOT NULL,
+    description TEXT,
+    logo_url VARCHAR(255),
+    status INTEGER DEFAULT 0,
+    founder_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE TABLE IF NOT EXISTS `activity` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '活动ID',
-    `club_id` BIGINT NOT NULL COMMENT '组织ID',
-    `name` VARCHAR(100) NOT NULL COMMENT '活动名称',
-    `description` TEXT COMMENT '活动描述',
-    `start_time` DATETIME NOT NULL COMMENT '开始时间',
-    `end_time` DATETIME NOT NULL COMMENT '结束时间',
-    `location` VARCHAR(200) COMMENT '活动地点',
-    `quota` INT DEFAULT 0 COMMENT '报名限额，0表示不限',
-    `status` TINYINT DEFAULT 0 COMMENT '状态：0-草稿，1-发布，2-结束',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX `idx_club_id` (`club_id`),
-    INDEX `idx_status` (`status`),
-    INDEX `idx_start_time` (`start_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动表';
+-- 社团成员表
+CREATE TABLE IF NOT EXISTS club_member (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    club_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    role INTEGER DEFAULT 0,
+    status INTEGER DEFAULT 0,
+    joined_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(club_id, user_id)
+);
 
-CREATE TABLE IF NOT EXISTS `registration` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '报名ID',
-    `activity_id` BIGINT NOT NULL COMMENT '活动ID',
-    `user_id` BIGINT NOT NULL COMMENT '用户ID',
-    `status` TINYINT DEFAULT 0 COMMENT '状态：0-待确认，1-已确认，2-等待中，3-取消',
-    `queue_position` INT DEFAULT 0 COMMENT '等待队列位置',
-    `registered_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '报名时间',
-    `confirmed_at` DATETIME COMMENT '确认时间',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    UNIQUE KEY `uk_activity_user` (`activity_id`, `user_id`),
-    INDEX `idx_activity_id` (`activity_id`),
-    INDEX `idx_user_id` (`user_id`),
-    INDEX `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报名表';
+-- 活动表
+CREATE TABLE IF NOT EXISTS activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    club_id INTEGER NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    location VARCHAR(200),
+    quota INTEGER DEFAULT 0,
+    status INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE TABLE IF NOT EXISTS `check_in` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '签到ID',
-    `registration_id` BIGINT NOT NULL UNIQUE COMMENT '报名ID',
-    `check_in_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '签到时间',
-    `method` TINYINT COMMENT '签到方式：1-扫码签到，2-地理位置签到，3-管理员手动签到',
-    `latitude` DECIMAL(10,7) COMMENT '签到纬度',
-    `longitude` DECIMAL(10,7) COMMENT '签到经度',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    INDEX `idx_registration_id` (`registration_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='签到表';
+-- 报名表
+CREATE TABLE IF NOT EXISTS registration (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    status INTEGER DEFAULT 0,
+    queue_position INTEGER DEFAULT 0,
+    registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    confirmed_at TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(activity_id, user_id)
+);
 
-CREATE TABLE IF NOT EXISTS `summary` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '总结ID',
-    `activity_id` BIGINT NOT NULL UNIQUE COMMENT '活动ID',
-    `content` TEXT COMMENT '总结内容',
-    `attachment_url` VARCHAR(255) COMMENT '附件地址',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    INDEX `idx_activity_id` (`activity_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动总结表';
+-- 签到表
+CREATE TABLE IF NOT EXISTS check_in (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    registration_id INTEGER NOT NULL UNIQUE,
+    check_in_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    method INTEGER,
+    latitude DECIMAL(10,7),
+    longitude DECIMAL(10,7),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 活动总结表
+CREATE TABLE IF NOT EXISTS summary (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    activity_id INTEGER NOT NULL UNIQUE,
+    content TEXT,
+    attachment_url VARCHAR(255),
+    status INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 创建索引
+CREATE INDEX IF NOT EXISTS idx_user_username ON user(username);
+CREATE INDEX IF NOT EXISTS idx_user_role ON user(role);
+CREATE INDEX IF NOT EXISTS idx_role_code ON role(code);
+CREATE INDEX IF NOT EXISTS idx_permission_code ON permission(code);
+CREATE INDEX IF NOT EXISTS idx_club_name ON club(name);
+CREATE INDEX IF NOT EXISTS idx_club_status ON club(status);
+CREATE INDEX IF NOT EXISTS idx_club_founder_id ON club(founder_id);
+CREATE INDEX IF NOT EXISTS idx_club_member_club_id ON club_member(club_id);
+CREATE INDEX IF NOT EXISTS idx_club_member_user_id ON club_member(user_id);
+CREATE INDEX IF NOT EXISTS idx_club_member_status ON club_member(status);
+CREATE INDEX IF NOT EXISTS idx_activity_club_id ON activity(club_id);
+CREATE INDEX IF NOT EXISTS idx_activity_status ON activity(status);
+CREATE INDEX IF NOT EXISTS idx_activity_start_time ON activity(start_time);
+CREATE INDEX IF NOT EXISTS idx_registration_activity_id ON registration(activity_id);
+CREATE INDEX IF NOT EXISTS idx_registration_user_id ON registration(user_id);
+CREATE INDEX IF NOT EXISTS idx_registration_status ON registration(status);
+CREATE INDEX IF NOT EXISTS idx_check_in_registration_id ON check_in(registration_id);
+CREATE INDEX IF NOT EXISTS idx_summary_activity_id ON summary(activity_id);
+CREATE INDEX IF NOT EXISTS idx_summary_status ON summary(status);
