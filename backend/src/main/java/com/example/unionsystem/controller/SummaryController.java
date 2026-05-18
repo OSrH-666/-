@@ -69,4 +69,16 @@ public class SummaryController {
         summaryService.removeById(id);
         return ApiResponse.success("删除成功", null);
     }
+
+    @PutMapping("/{id}/approve")
+    public ApiResponse<Summary> approve(@PathVariable Long id) {
+        Summary summary = summaryService.approveSummary(id);
+        return ApiResponse.success("审核通过", summary);
+    }
+
+    @PutMapping("/{id}/reject")
+    public ApiResponse<Summary> reject(@PathVariable Long id) {
+        Summary summary = summaryService.rejectSummary(id);
+        return ApiResponse.success("审核拒绝", summary);
+    }
 }
