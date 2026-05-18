@@ -34,6 +34,11 @@
 | student_id | VARCHAR(20) | - |
 | email | VARCHAR(100) | - |
 | phone | VARCHAR(20) | - |
+| role | VARCHAR(50) | DEFAULT 'STUDENT' |
+| grade | VARCHAR(20) | - |
+| major | VARCHAR(50) | - |
+| class_name | VARCHAR(50) | - |
+| avatar_url | VARCHAR(255) | - |
 | status | INTEGER | DEFAULT 1 |
 | created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 | updated_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
@@ -88,6 +93,17 @@
 | latitude | DECIMAL(10,7) | - |
 | longitude | DECIMAL(10,7) | - |
 | created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
+
+#### 活动总结表 (summary)
+| 字段 | 类型 | 约束 |
+|------|------|------|
+| id | INTEGER | PRIMARY KEY AUTOINCREMENT |
+| activity_id | INTEGER | FOREIGN KEY |
+| content | TEXT | - |
+| attachment_url | VARCHAR(255) | - |
+| status | INTEGER | DEFAULT 0 |
+| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
+| updated_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
 #### 角色权限相关表
 - **role** - 角色表
