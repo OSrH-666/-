@@ -46,6 +46,7 @@ public class SummaryServiceImpl extends ServiceImpl<SummaryMapper, Summary> impl
         summary.setActivityId(activityId);
         summary.setContent(content);
         summary.setAttachmentUrl(attachmentUrl);
+        summary.setStatus(0); // 默认为待审核
         save(summary);
         return summary;
     }
@@ -77,5 +78,45 @@ public class SummaryServiceImpl extends ServiceImpl<SummaryMapper, Summary> impl
     public Summary findByActivityId(Long activityId) {
         return getOne(new LambdaQueryWrapper<Summary>()
                 .eq(Summary::getActivityId, activityId));
+    }
+
+    @Override
+    public Summary approveSummary(Long id) {
+        Long currentUserId = SecurityUtil.getCurrentUserId();
+        Summary summary = getById(id);
+        if (summary == null) {
+            throw new RuntimeException("总结不存在");
+        }
+
+        Activity activity = activityService.getById(summary.getActivityId());
+        if (activity != null && SecurityUtil.isClubManager() && currentUserId != null) {
+            if (!clubMemberService.isClubManager(currentUserId, activity.getClubId())) {
+                throw new RuntimeException("您不是该社团的负责人，无权审核活动总结");
+            }
+        }
+
+        summary.setStatus(1); // 审核通过
+        updateById(summary);
+        return summary;
+    }
+
+    @Override
+    public Summary rejectSummary(Long id) {
+        Long currentUserId = SecurityUtil.getCurrentUserId();
+        Summary summary = getById(id);
+        if (summary == null) {
+            throw new RuntimeException("总结不存在");
+        }
+
+        Activity activity = activityService.getById(summary.getActivityId());
+        if (activity != null && SecurityUtil.isClubManager() && currentUserId != null) {
+            if (!clubMemberService.isClubManager(currentUserId, activity.getClubId())) {
+                throw new RuntimeException("您不是该社团的负责人，无权审核活动总结");
+            }
+        }
+
+        summary.setStatus(2); // 审核拒绝
+        updateById(summary);
+        return summary;
     }
 }
