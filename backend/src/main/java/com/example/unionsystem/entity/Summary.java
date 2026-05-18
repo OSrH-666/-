@@ -20,6 +20,8 @@ public class Summary {
     
     private String attachmentUrl;
     
+    private Integer status;
+    
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
