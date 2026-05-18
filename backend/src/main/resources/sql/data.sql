@@ -34,15 +34,15 @@ INSERT INTO role_permission (role_id, permission_id) VALUES
 (3, 7), (3, 8), (3, 9), (3, 10), (3, 11);
 
 -- 插入用户数据 (密码为 BCrypt 加密的 '123456')
-INSERT INTO user (username, password, real_name, student_id, email, phone, role, status) VALUES 
-('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '系统管理员', '202400000000', 'admin@example.com', '13800138000', 'ADMIN', 1),
-('yangsiqin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '杨思勤', '202405567014', 'yangsiqin@example.com', '13800138001', 'CLUB_MANAGER', 1),
-('guhua', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '古华', '202405567034', 'guhua@example.com', '13800138002', 'CLUB_MANAGER', 1),
-('helinhan', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '何林晗', '202405567008', 'helinhan@example.com', '13800138003', 'STUDENT', 1),
-('jiangnanzhu', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '蒋南柱', '202405567007', 'jiangnanzhu@example.com', '13800138004', 'STUDENT', 1),
-('pengzihao', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '彭子皓', '202405567019', 'pengzihao@example.com', '13800138005', 'STUDENT', 1),
-('zhangsan', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '张三', '202405567020', 'zhangsan@example.com', '13800138006', 'STUDENT', 1),
-('lisi', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '李四', '202405567021', 'lisi@example.com', '13800138007', 'STUDENT', 1);
+INSERT INTO user (username, password, real_name, student_id, email, phone, role, grade, major, class_name, avatar_url, status) VALUES 
+('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '系统管理员', '202400000000', 'admin@example.com', '13800138000', 'ADMIN', NULL, NULL, NULL, NULL, 1),
+('yangsiqin', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '杨思勤', '202405567014', 'yangsiqin@example.com', '13800138001', 'CLUB_MANAGER', '2023级', '计算机科学与技术', '计科2301', NULL, 1),
+('guhua', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '古华', '202405567034', 'guhua@example.com', '13800138002', 'CLUB_MANAGER', '2023级', '软件工程', '软工2302', NULL, 1),
+('helinhan', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '何林晗', '202405567008', 'helinhan@example.com', '13800138003', 'STUDENT', '2023级', '计算机科学与技术', '计科2301', NULL, 1),
+('jiangnanzhu', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '蒋南柱', '202405567007', 'jiangnanzhu@example.com', '13800138004', 'STUDENT', '2023级', '计算机科学与技术', '计科2301', NULL, 1),
+('pengzihao', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '彭子皓', '202405567019', 'pengzihao@example.com', '13800138005', 'STUDENT', '2023级', '软件工程', '软工2302', NULL, 1),
+('zhangsan', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '张三', '202405567020', 'zhangsan@example.com', '13800138006', 'STUDENT', '2023级', '软件工程', '软工2302', NULL, 1),
+('lisi', '$2a$10$N9qo8uLOickgx2ZMRZoMye.IjzqAKL9xL5jvMFVdNJHvGCgTq/VEq', '李四', '202405567021', 'lisi@example.com', '13800138007', 'STUDENT', '2023级', '网络工程', '网工2301', NULL, 1);
 
 -- 插入用户角色关联数据
 INSERT INTO user_role (user_id, role_id) VALUES 
@@ -102,5 +102,5 @@ INSERT INTO check_in (registration_id, check_in_time, method, latitude, longitud
 (8, '2024-11-15 08:20:00', 1, 30.5681, 104.0581);   -- 李四定位签到志愿服务
 
 -- 插入活动总结数据
-INSERT INTO summary (activity_id, content, attachment_url) VALUES 
-(3, '本次迎新晚会圆满成功！共有500余名观众到场观看，节目形式多样，包括歌曲、舞蹈、小品等15个节目。晚会不仅展示了新生的才艺，也增强了同学们之间的交流与团结。感谢所有参与演出的同学和工作人员的辛勤付出！', 'https://example.com/summary/20240901.pdf');
+INSERT INTO summary (activity_id, content, attachment_url, status) VALUES 
+(3, '本次迎新晚会圆满成功！共有500余名观众到场观看，节目形式多样，包括歌曲、舞蹈、小品等15个节目。晚会不仅展示了新生的才艺，也增强了同学们之间的交流与团结。感谢所有参与演出的同学和工作人员的辛勤付出！', 'https://example.com/summary/20240901.pdf', 1);
