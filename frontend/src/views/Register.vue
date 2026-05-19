@@ -2,12 +2,12 @@
   <div class="register-container">
     <el-card class="register-card">
       <h2>注册</h2>
-      <el-form :model="form" ref="formRef" label-width="80px">
+      <el-form :model="form" ref="formRef" label-width="80px" :rules="rules">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" />
+          <el-input v-model="form.password" type="password" placeholder="请输入密码（至少6位）" />
         </el-form-item>
         <el-form-item label="真实姓名" prop="realName">
           <el-input v-model="form.realName" placeholder="请输入真实姓名" />
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { authApi } from '../api'
@@ -51,7 +51,22 @@ const form = ref({
 const formRef = ref(null)
 const loading = ref(false)
 
+const rules = reactive({
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码长度至少为6位', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+  ]
+})
+
 const register = async () => {
+  if (!formRef.value) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  
   loading.value = true
   try {
     const response = await authApi.register(form.value)
