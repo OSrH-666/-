@@ -44,19 +44,22 @@ const login = async () => {
         role: response.data.role
       }))
       ElMessage.success('登录成功！')
-      const rolePath = {
-        student: '/student',
-        leader: '/leader',
-        admin: '/admin'
-      }
-      router.push(rolePath[response.data.role] || '/student')
+      router.push('/')
     } else {
-      ElMessage.error(response.message || '登录失败')
+      if (response.code === 403) {
+        ElMessage.error('账号已禁用，请联系管理员')
+      } else {
+        ElMessage.error(response.message || '登录失败')
+      }
     }
   } catch (error) {
     console.error('登录失败:', error)
     if (error.response) {
-      ElMessage.error(error.response.data?.message || '登录失败')
+      if (error.response.data?.code === 403) {
+        ElMessage.error('账号已禁用，请联系管理员')
+      } else {
+        ElMessage.error(error.response.data?.message || '登录失败')
+      }
     } else if (error.request) {
       ElMessage.error('网络错误，请检查后端服务是否启动')
     } else {
