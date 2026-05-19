@@ -2,8 +2,8 @@
   <div class="activity-form">
     <el-card>
       <h3>{{ isEdit ? '编辑活动' : '新建活动' }}</h3>
-      <el-form :model="form" label-width="100px">
-        <el-form-item label="活动名称">
+      <el-form :model="form" ref="formRef" :rules="rules" label-width="100px">
+        <el-form-item label="活动名称" prop="name">
           <el-input v-model="form.name" />
         </el-form-item>
         <el-form-item label="所属组织">
@@ -34,14 +34,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { activityApi } from '../api'
 
 const router = useRouter()
 const route = useRoute()
 
 const isEdit = ref(false)
+const formRef = ref(null)
 const form = ref({
   name: '',
   clubId: '',
@@ -52,7 +54,16 @@ const form = ref({
   quota: 0
 })
 
+const rules = reactive({
+  name: [
+    { required: true, message: '活动标题不能为空', trigger: 'blur' }
+  ]
+})
+
 const submit = async () => {
+  if (!formRef.value) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
   if (isEdit.value) {
     await activityApi.update(route.params.id, form.value)
   } else {
