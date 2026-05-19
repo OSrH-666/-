@@ -76,6 +76,7 @@ const userInfo = ref({});
 const menuItems = [
  { path: '/', name: '首页', icon: markRaw(HomeFilled) },
  { path: '/clubs', name: '组织管理', icon: markRaw(Briefcase) },
+ { path: '/members', name: '成员管理', icon: markRaw(User) },
  { path: '/activities', name: '活动管理', icon: markRaw(Calendar) },
  { path: '/registrations', name: '报名管理', icon: markRaw(List) },
  { path: '/summaries', name: '活动总结', icon: markRaw(Files) }
